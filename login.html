@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Authentication - Step 1</title>
+  <style>
+    /* Basic styles for the phone number input */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f7f7f7;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      background-color: #ccc;
+    }
+    .message {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>OTP Verification</h2>
+    <input type="text" id="phoneNumber" class="input-field" placeholder="Enter Phone Number" />
+    <button class="btn" id="sendOTPBtn">Send OTP</button>
+    <div class="message" id="errorMessage"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+  <script>
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAl_fboAsFpoAYvQ0mveRQNHpFOwDJyqY8",
+  authDomain: "hope-227b0.firebaseapp.com",
+  projectId: "hope-227b0",
+  storageBucket: "hope-227b0.firebasestorage.app",
+  messagingSenderId: "722895336932",
+  appId: "1:722895336932:web:079f3cb4922b22c9d083f1",
+  measurementId: "G-L2J2LKJR7R"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    const auth = firebase.auth();
+    let verificationCode = "";
+
+    const sendOTPBtn = document.getElementById('sendOTPBtn');
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const errorMessage = document.getElementById('errorMessage');
+
+    sendOTPBtn.addEventListener('click', () => {
+      const phoneNumber = phoneNumberInput.value;
+
+      if (phoneNumber.length === 0) {
+        errorMessage.textContent = "Please enter a valid phone number.";
+        return;
+      }
+
+      const appVerifier = new firebase.auth.RecaptchaVerifier('sendOTPBtn', {
+        size: 'invisible',
+        callback: () => {
+          firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+            .then((confirmationResult) => {
+              verificationCode = confirmationResult;
+              window.location.href = 'otp-verification.html';  // Redirect to OTP page
+            })
+            .catch((error) => {
+              errorMessage.textContent = error.message;
+            });
+        }
+      });
+
+      appVerifier.render();
+    });
+  </script>
+
+</body>
+</html>
